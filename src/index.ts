@@ -10,5 +10,6 @@
 export * from '#src/types'
 export * from '#src/facades/Cache'
 export * from '#src/cache/CacheImpl'
+export * from '#src/factories/StoreFactory'
 export * from '#src/providers/CacheProvider'
 export * from '#src/cache/drivers/MemoryDriver'
