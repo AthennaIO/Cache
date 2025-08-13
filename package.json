@@ -1,12 +1,12 @@
 {
-  "name": "@athenna/template",
+  "name": "@athenna/cache",
   "version": "5.0.0",
-  "description": "Template for new projects.",
+  "description": "The cache handler for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
-  "bugs": "https://github.com/AthennaIO/Template/issues",
-  "repository": "https://github.com/AthennaIO/Template.git",
-  "homepage": "https://github.com/AthennaIO/Template#readme",
+  "bugs": "https://github.com/AthennaIO/Cache/issues",
+  "repository": "https://github.com/AthennaIO/Cache.git",
+  "homepage": "https://github.com/AthennaIO/Cache#readme",
   "keywords": [
     "esm",
     "athenna"
@@ -50,7 +50,11 @@
     "#tests": "./tests/index.js"
   },
   "devDependencies": {
+    "@athenna/artisan": "^5.7.0",
     "@athenna/common": "^5.17.0",
+    "@athenna/config": "^5.4.0",
+    "@athenna/ioc": "^5.2.0",
+    "@athenna/logger": "^5.10.0",
     "@athenna/test": "^5.5.0",
     "@athenna/tsconfig": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -160,5 +164,8 @@
         }
       ]
     }
+  },
+  "dependencies": {
+    "lru-cache": "^11.1.0"
   }
 }

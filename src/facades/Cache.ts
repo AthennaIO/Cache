@@ -7,4 +7,7 @@
  * file that was distributed with this source code.
  */
 
-export * from '#src/types/StoreOptions'
+import { Facade } from '@athenna/ioc'
+import type { CacheImpl } from '#src/cache/CacheImpl'
+
+export const Cache = Facade.createFor<CacheImpl>('Athenna/Core/Cache')
