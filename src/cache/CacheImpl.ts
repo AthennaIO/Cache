@@ -22,7 +22,7 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
   /**
    * The drivers responsible for handling cache operations.
    */
-  public driver: MemoryDriver = null
+  public driver: Driver = null
 
   /**
    * Creates a new instance of CacheImpl.
@@ -33,13 +33,13 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
     this.driver = StoreFactory.fabricate(
       this.storeName,
       athennaCacheOpts?.options
-    )
+    ) as unknown as Driver
 
     this.connect(athennaCacheOpts)
   }
 
-  public store(con: 'memory', options?: StoreOptions): CacheImpl<MemoryDriver>
-
+  public store(store: 'memory', options?: StoreOptions): CacheImpl<MemoryDriver>
+  public store(store: 'memory' | string): CacheImpl<MemoryDriver>
   /**
    * Change the store connection.
    *
@@ -48,10 +48,7 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
    * await Cache.store('redis').set('my:cache:key', 'hello')
    * ```
    */
-  public store(
-    store: 'memory' | string,
-    options?: StoreOptions
-  ): CacheImpl<Driver> {
+  public store(store: 'memory' | string, options?: StoreOptions) {
     const driver = StoreFactory.fabricate(store, options?.options)
     const cache = new CacheImpl<typeof driver>(options)
 
