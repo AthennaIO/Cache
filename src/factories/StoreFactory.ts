@@ -10,6 +10,7 @@
 import { debug } from '#src/debug'
 import type { StoreOptions } from '#src/types'
 import type { Driver } from '#src/cache/drivers/Driver'
+import { RedisDriver } from '#src/cache/drivers/RedisDriver'
 import { MemoryDriver } from '#src/cache/drivers/MemoryDriver'
 import { NotFoundDriverException } from '#src/exceptions/NotFoundDriverException'
 import { NotImplementedConfigException } from '#src/exceptions/NotImplementedConfigException'
@@ -23,10 +24,19 @@ export class StoreFactory {
   /**
    * Holds all the Athenna drivers implementations available.
    */
-  public static drivers: Map<string, any> = new Map().set(
-    'memory',
-    MemoryDriver
-  )
+  public static drivers: Map<string, any> = new Map()
+    .set('redis', RedisDriver)
+    .set('memory', MemoryDriver)
+
+  public static fabricate(
+    store: 'redis',
+    options?: StoreOptions['options']
+  ): RedisDriver
+
+  public static fabricate(
+    store: 'redis' | string,
+    options?: StoreOptions['options']
+  ): RedisDriver
 
   public static fabricate(
     con: 'memory',
@@ -37,6 +47,11 @@ export class StoreFactory {
     con: 'memory' | string,
     options?: StoreOptions['options']
   ): MemoryDriver
+
+  public static fabricate(
+    con: 'redis' | 'memory' | string,
+    options?: StoreOptions['options']
+  ): RedisDriver | MemoryDriver
 
   /**
    * Fabricate a new connection for a specific driver.

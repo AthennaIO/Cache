@@ -10,6 +10,7 @@
 import { MemoryDriver } from '#src'
 import { Path } from '@athenna/common'
 import { StoreFactory } from '#src/factories/StoreFactory'
+import { RedisDriver } from '#src/cache/drivers/RedisDriver'
 import { TestDriver } from '#tests/fixtures/drivers/TestDriver'
 import { AfterEach, BeforeEach, Test, type Context } from '@athenna/test'
 import { NotFoundDriverException } from '#src/exceptions/NotFoundDriverException'
@@ -32,7 +33,7 @@ export class StoreFactoryTest {
   public async shouldBeAbleToGetAllAvailableDrivers({ assert }: Context) {
     const availableDrivers = StoreFactory.availableDrivers()
 
-    assert.deepEqual(availableDrivers, ['memory'])
+    assert.deepEqual(availableDrivers, ['redis', 'memory'])
   }
 
   @Test()
@@ -49,6 +50,13 @@ export class StoreFactoryTest {
     const availableStores = StoreFactory.availableStores()
 
     assert.deepEqual(availableStores, ['test'])
+  }
+
+  @Test()
+  public async shouldBeAbleToFabricateNewStoresAndReturnRedisDriverInstance({ assert }: Context) {
+    const driver = StoreFactory.fabricate('redis')
+
+    assert.instanceOf(driver, RedisDriver)
   }
 
   @Test()

@@ -54,6 +54,14 @@ export type StoreOptions = {
     ttl?: number
 
     /**
+     * Define a prefix for the store. By default, prefix
+     * will always be used in front of your keys if it exists.
+     *
+     * @default Config.get(`cache.stores.${store}.prefix`)
+     */
+    prefix?: string
+
+    /**
      * Define the max number of items that could be inserted in the cache.
      *
      * @default Config.get(`cache.stores.${store}.maxItems`)

@@ -166,6 +166,7 @@
     }
   },
   "dependencies": {
-    "lru-cache": "^11.1.0"
+    "lru-cache": "^11.1.0",
+    "redis": "^5.8.1"
   }
 }

@@ -1,12 +1,3 @@
-/**
- * @athenna/queue
- *
- * (c) João Lenon <lenon@athenna.io>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 import { Env } from '@athenna/config'
 
 export default {
@@ -32,31 +23,20 @@ export default {
    | is used by your application. A default configuration has been added
    | for each back-end shipped with Athenna. You are free to add more.
    |
-   | Drivers: "memory"
+   | Drivers: "redis", "memory"
    |
    */
 
   stores: {
+    memory: {
+      driver: 'memory'
+    },
+
     redis: {
       driver: 'redis',
-      ttl: 1000,
 
-      host: 'localhost',
-      port: 6382,
-      database: 0
-    },
-
-    memory: {
-      driver: 'memory',
-      ttl: 1000
-    },
-
-    'not-found': {
-      driver: 'not-found'
-    },
-
-    test: {
-      driver: 'test'
+      url: Env('REDIS_URL', 'redis://localhost:6379?database=0')
     }
   }
 }
+
