@@ -70,7 +70,9 @@
     "eslint-plugin-promise": "^6.6.0",
     "husky": "^3.1.0",
     "lint-staged": "^12.5.0",
-    "prettier": "^2.8.8"
+    "lru-cache": "^11.1.0",
+    "prettier": "^2.8.8",
+    "redis": "^5.8.1"
   },
   "c8": {
     "all": true,
@@ -164,9 +166,5 @@
         }
       ]
     }
-  },
-  "dependencies": {
-    "lru-cache": "^11.1.0",
-    "redis": "^5.8.1"
   }
 }

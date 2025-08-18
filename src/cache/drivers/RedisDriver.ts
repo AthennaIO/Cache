@@ -9,11 +9,11 @@
 
 import { Log } from '@athenna/logger'
 import { Config } from '@athenna/config'
+import type { RedisClientType } from 'redis'
 import type { StoreOptions } from '#src/types'
 import { Driver } from '#src/cache/drivers/Driver'
 import { Is, Parser, Options } from '@athenna/common'
 import { StoreFactory } from '#src/factories/StoreFactory'
-import { createClient, type RedisClientType } from 'redis'
 
 export class RedisDriver extends Driver<RedisClientType> {
   /**
@@ -105,6 +105,8 @@ export class RedisDriver extends Driver<RedisClientType> {
     if (this.isConnected && !options.force) {
       return
     }
+
+    const { createClient } = this.getRedis()
 
     this.client = createClient({ url: this.url, socket: this.socket })
     this.client

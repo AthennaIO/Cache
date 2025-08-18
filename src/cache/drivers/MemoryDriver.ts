@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { LRUCache } from 'lru-cache'
+import type { LRUCache } from 'lru-cache'
 import type { StoreOptions } from '#src/types'
 import { Driver } from '#src/cache/drivers/Driver'
 import { Parser, Options, Is } from '@athenna/common'
@@ -31,6 +31,8 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
     if (this.isConnected && !options.force) {
       return
     }
+
+    const { LRUCache } = this.getLruCache()
 
     this.client = new LRUCache({
       max: this.maxItems,

@@ -9,6 +9,7 @@
 
 import { Config } from '@athenna/config'
 import type { StoreOptions } from '#src/types'
+import { Module } from '@athenna/common'
 
 export abstract class Driver<Client = any> {
   /**
@@ -72,6 +73,24 @@ export abstract class Driver<Client = any> {
       this.isConnected = true
       this.isSavedOnFactory = true
     }
+  }
+
+  /**
+   * Import the redis module if it exists.
+   */
+  public getRedis() {
+    const require = Module.createRequire(import.meta.url)
+
+    return require('redis')
+  }
+
+  /**
+   * Import the lru-cache module if it exists.
+   */
+  public getLruCache() {
+    const require = Module.createRequire(import.meta.url)
+
+    return require('lru-cache')
   }
 
   /**
