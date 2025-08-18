@@ -9,6 +9,7 @@
 
 import { Config } from '@athenna/config'
 import type { StoreOptions } from '#src/types'
+import { Module } from '@athenna/common'
 
 export abstract class Driver<Client = any> {
   /**
@@ -37,6 +38,11 @@ export abstract class Driver<Client = any> {
   public ttl: number
 
   /**
+   * Set the cache prefix of the driver.
+   */
+  public prefix: string
+
+  /**
    * Define the max number of items that could be inserted in the cache.
    */
   public maxItems: number
@@ -59,6 +65,7 @@ export abstract class Driver<Client = any> {
     this.ttl = options?.ttl || config.ttl
     this.maxItems = options?.maxItems || config.maxItems || 1000
     this.maxEntrySize = options?.maxEntrySize || config.maxEntrySize
+    this.prefix = this.sanitizePrefix(options?.prefix || config?.prefix)
     this.store = store
 
     if (client) {
@@ -66,6 +73,24 @@ export abstract class Driver<Client = any> {
       this.isConnected = true
       this.isSavedOnFactory = true
     }
+  }
+
+  /**
+   * Import the redis module if it exists.
+   */
+  public getRedis() {
+    const require = Module.createRequire(import.meta.url)
+
+    return require('redis')
+  }
+
+  /**
+   * Import the lru-cache module if it exists.
+   */
+  public getLruCache() {
+    const require = Module.createRequire(import.meta.url)
+
+    return require('lru-cache')
   }
 
   /**
@@ -91,6 +116,29 @@ export abstract class Driver<Client = any> {
     this.client = client
 
     return this
+  }
+
+  /**
+   * Sanitize the cache prefix by removing any trailing colons.
+   */
+  public sanitizePrefix(prefix: string) {
+    if (!prefix) {
+      return ''
+    }
+
+    return prefix.replace(/:+$/, '')
+  }
+
+  /**
+   * Automatically set the cache prefix if it exists.
+   * Otherwise just return the key defined.
+   */
+  public getCacheKey(key: string) {
+    if (this.prefix) {
+      return `${this.prefix}:${key}`
+    }
+
+    return key
   }
 
   /**

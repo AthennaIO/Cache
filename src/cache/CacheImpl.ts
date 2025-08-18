@@ -10,7 +10,8 @@
 import { Macroable, Options } from '@athenna/common'
 import { StoreFactory } from '#src/factories/StoreFactory'
 import type { StoreOptions } from '#src/types/StoreOptions'
-import { MemoryDriver } from '#src/cache/drivers/MemoryDriver'
+import type { RedisDriver } from '#src/cache/drivers/RedisDriver'
+import type { MemoryDriver } from '#src/cache/drivers/MemoryDriver'
 import type { Driver as DriverImpl } from '#src/cache/drivers/Driver'
 
 export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
@@ -22,7 +23,7 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
   /**
    * The drivers responsible for handling cache operations.
    */
-  public driver: Driver = null
+  public driver: RedisDriver | MemoryDriver = null
 
   /**
    * Creates a new instance of CacheImpl.
@@ -33,13 +34,19 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
     this.driver = StoreFactory.fabricate(
       this.storeName,
       athennaCacheOpts?.options
-    ) as unknown as Driver
+    )
 
     this.connect(athennaCacheOpts)
   }
 
+  public store(store: 'redis', options?: StoreOptions): CacheImpl<RedisDriver>
   public store(store: 'memory', options?: StoreOptions): CacheImpl<MemoryDriver>
-  public store(store: 'memory' | string): CacheImpl<MemoryDriver>
+
+  public store(
+    store: 'redis' | 'memory' | string,
+    options?: StoreOptions
+  ): CacheImpl<RedisDriver> | CacheImpl<MemoryDriver>
+
   /**
    * Change the store connection.
    *
@@ -48,7 +55,10 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
    * await Cache.store('redis').set('my:cache:key', 'hello')
    * ```
    */
-  public store(store: 'memory' | string, options?: StoreOptions) {
+  public store(
+    store: 'redis' | 'memory' | string,
+    options?: StoreOptions
+  ): CacheImpl<Driver> {
     const driver = StoreFactory.fabricate(store, options?.options)
     const cache = new CacheImpl<typeof driver>(options)
 
