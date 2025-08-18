@@ -1,6 +1,6 @@
 {
   "name": "@athenna/cache",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "The cache handler for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
@@ -37,7 +37,8 @@
     "./types": "./src/types/index.js",
     "./package": "./package.json",
     "./package.json": "./package.json",
-    "./testing/plugins": "./src/testing/plugins/index.js"
+    "./testing/plugins": "./src/testing/plugins/index.js",
+    "./providers/CacheProvider": "./src/providers/CacheProvider.js"
   },
   "imports": {
     "#bin/*": "./bin/*.js",
