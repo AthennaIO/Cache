@@ -98,7 +98,17 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Set a value in the cache.
    */
   public async set(key: string, value: any, options?: { ttl?: number }) {
-    this.client.set(key, value, { ttl: options?.ttl || this.ttl })
+    const driverOptions: any = {}
+
+    options = Options.create(options, {
+      ttl: this.ttl
+    })
+
+    if (options.ttl) {
+      driverOptions.ttl = options.ttl
+    }
+
+    this.client.set(key, value, driverOptions)
   }
 
   /**
