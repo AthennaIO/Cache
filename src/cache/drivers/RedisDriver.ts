@@ -119,8 +119,11 @@ export class RedisDriver extends Driver<RedisClientType> {
         }
       })
       .catch(err => {
-        console.error(err)
+        console.error('error happened while trying to connect to redis', err)
+
+        throw err
       })
+
     this.isConnected = true
     this.isSavedOnFactory = options.saveOnFactory
 
@@ -193,12 +196,20 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Set a value in the cache.
    */
   public async set(key: string, value: any, options?: { ttl?: number }) {
-    await this.client.set(this.getCacheKey(key), value, {
-      expiration: {
+    const driverOptions: any = {}
+
+    options = Options.create(options, {
+      ttl: this.ttl
+    })
+
+    if (options.ttl) {
+      driverOptions.expiration = {
         type: 'EX',
         value: Math.ceil((options?.ttl || this.ttl) / 1000)
       }
-    })
+    }
+
+    await this.client.set(this.getCacheKey(key), value, driverOptions)
   }
 
   /**
