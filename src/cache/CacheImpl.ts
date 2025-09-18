@@ -156,7 +156,7 @@ export class CacheImpl<Driver extends DriverImpl = any> extends Macroable {
    * ```
    */
   public async set(key: string, value: string, options?: { ttl?: number }) {
-    options = Options.create({
+    options = Options.create(options, {
       ttl: Config.get(`cache.stores.${this.storeName}.ttl`)
     })
 
