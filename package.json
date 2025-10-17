@@ -1,6 +1,6 @@
 {
   "name": "@athenna/cache",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "description": "The cache handler for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
