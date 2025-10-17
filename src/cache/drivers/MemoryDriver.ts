@@ -67,6 +67,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Reset all data defined inside cache.
    */
   public async truncate() {
+    if (!this.enabled) {
+      return
+    }
+
     for (const key of this.client.keys()) {
       this.client.delete(key)
     }
@@ -76,6 +80,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Get a value from the cache.
    */
   public async get<T = any>(key: string, defaultValue?: T): Promise<T> {
+    if (!this.enabled) {
+      return
+    }
+
     const value = this.client.get(key)
 
     if (Is.Null(value) || Is.Undefined(value)) {
@@ -89,6 +97,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Validate if a value exists in the cache.
    */
   public async has(key: string): Promise<boolean> {
+    if (!this.enabled) {
+      return false
+    }
+
     const value = await this.get(key)
 
     return !!value
@@ -98,6 +110,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Set a value in the cache.
    */
   public async set(key: string, value: any, options?: { ttl?: number }) {
+    if (!this.enabled) {
+      return
+    }
+
     const driverOptions: any = {}
 
     options = Options.create(options, {
@@ -116,6 +132,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * the same time.
    */
   public async pull<T = any>(key: string) {
+    if (!this.enabled) {
+      return
+    }
+
     const value = await this.get<T>(key)
 
     await this.delete(key)
@@ -127,6 +147,10 @@ export class MemoryDriver extends Driver<LRUCache<string, any>> {
    * Delete a value from the cache.
    */
   public async delete(key: string) {
+    if (!this.enabled) {
+      return
+    }
+
     this.client.delete(key)
   }
 }

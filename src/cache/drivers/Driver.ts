@@ -8,8 +8,8 @@
  */
 
 import { Config } from '@athenna/config'
-import type { StoreOptions } from '#src/types'
 import { Module } from '@athenna/common'
+import type { StoreOptions } from '#src/types'
 
 export abstract class Driver<Client = any> {
   /**
@@ -38,6 +38,12 @@ export abstract class Driver<Client = any> {
   public ttl: number
 
   /**
+   * Set if cache is enabled. Use this when you wait to avoid fetching from
+   * cache for testing purposes.
+   */
+  public enabled: boolean
+
+  /**
    * Set the cache prefix of the driver.
    */
   public prefix: string
@@ -63,6 +69,7 @@ export abstract class Driver<Client = any> {
     const config = Config.get(`cache.stores.${store}`)
 
     this.ttl = options?.ttl || config.ttl
+    this.enabled = options?.enabled || config.enabled || true
     this.maxItems = options?.maxItems || config.maxItems || 1000
     this.maxEntrySize = options?.maxEntrySize || config.maxEntrySize
     this.prefix = this.sanitizePrefix(options?.prefix || config?.prefix)

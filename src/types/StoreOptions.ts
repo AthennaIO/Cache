@@ -54,6 +54,14 @@ export type StoreOptions = {
     ttl?: number
 
     /**
+     * Define if your cache will be enabled or not. Useful when you want
+     * to make tests.
+     *
+     * @default Config.get(`cache.stores.${store}.enabled`)
+     */
+    enabled?: boolean
+
+    /**
      * Define a prefix for the store. By default, prefix
      * will always be used in front of your keys if it exists.
      *
