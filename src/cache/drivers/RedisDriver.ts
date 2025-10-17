@@ -154,6 +154,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Reset all data defined inside cache.
    */
   public async truncate() {
+    if (!this.enabled) {
+      return
+    }
+
     let cursor = '0'
 
     do {
@@ -174,6 +178,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Get a value from the cache.
    */
   public async get<T = any>(key: string, defaultValue?: T): Promise<T> {
+    if (!this.enabled) {
+      return
+    }
+
     const value = await this.client.get(this.getCacheKey(key))
 
     if (Is.Null(value) || Is.Undefined(value)) {
@@ -187,6 +195,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Validate if a value exists in the cache.
    */
   public async has(key: string): Promise<boolean> {
+    if (!this.enabled) {
+      return
+    }
+
     const value = await this.get(key)
 
     return !!value
@@ -196,6 +208,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Set a value in the cache.
    */
   public async set(key: string, value: any, options?: { ttl?: number }) {
+    if (!this.enabled) {
+      return
+    }
+
     const driverOptions: any = {}
 
     options = Options.create(options, {
@@ -217,6 +233,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * the same time.
    */
   public async pull<T = any>(key: string) {
+    if (!this.enabled) {
+      return
+    }
+
     const value = await this.get<T>(key)
 
     await this.delete(key)
@@ -228,6 +248,10 @@ export class RedisDriver extends Driver<RedisClientType> {
    * Delete a value from the cache.
    */
   public async delete(key: string) {
+    if (!this.enabled) {
+      return
+    }
+
     await this.client.del(this.getCacheKey(key))
   }
 }
