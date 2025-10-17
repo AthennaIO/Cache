@@ -68,12 +68,12 @@ export abstract class Driver<Client = any> {
   ) {
     const config = Config.get(`cache.stores.${store}`)
 
-    this.ttl = options?.ttl || config.ttl
-    this.enabled = options?.enabled || config.enabled || true
-    this.maxItems = options?.maxItems || config.maxItems || 1000
-    this.maxEntrySize = options?.maxEntrySize || config.maxEntrySize
-    this.prefix = this.sanitizePrefix(options?.prefix || config?.prefix)
     this.store = store
+    this.ttl = options?.ttl ?? config.ttl
+    this.enabled = options?.enabled ?? config.enabled ?? true
+    this.maxItems = options?.maxItems ?? config.maxItems ?? 1000
+    this.maxEntrySize = options?.maxEntrySize || config.maxEntrySize
+    this.prefix = this.sanitizePrefix(options?.prefix ?? config?.prefix)
 
     if (client) {
       this.client = client
