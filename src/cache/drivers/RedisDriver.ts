@@ -119,9 +119,9 @@ export class RedisDriver extends Driver<RedisClientType> {
         }
       })
       .catch(err => {
-        console.error('error happened while trying to connect to redis', err)
+        err.message = `Error happened while trying to connect ${this.store} cache store: ${err.message}`
 
-        throw err
+        Log.channelOrVanilla('exception').error(err)
       })
 
     this.isConnected = true
