@@ -118,11 +118,6 @@ export class RedisDriver extends Driver<RedisClientType> {
           )
         }
       })
-      .catch(err => {
-        err.message = `Error happened while trying to connect ${this.store} cache store: ${err.message}`
-
-        Log.channelOrVanilla('exception').error(err)
-      })
 
     this.isConnected = true
     this.isSavedOnFactory = options.saveOnFactory

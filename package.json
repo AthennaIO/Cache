@@ -1,6 +1,6 @@
 {
   "name": "@athenna/cache",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "The cache handler for Athenna Framework.",
   "license": "MIT",
   "author": "João Lenon <lenon@athenna.io>",
@@ -51,13 +51,13 @@
     "#tests": "./tests/index.js"
   },
   "devDependencies": {
-    "@athenna/artisan": "^5.7.0",
-    "@athenna/common": "^5.17.0",
-    "@athenna/config": "^5.4.0",
+    "@athenna/artisan": "^5.12.0",
+    "@athenna/common": "^5.34.0",
+    "@athenna/config": "^5.6.0",
     "@athenna/ioc": "^5.2.0",
-    "@athenna/logger": "^5.10.0",
-    "@athenna/test": "^5.5.0",
-    "@athenna/tsconfig": "^5.0.0",
+    "@athenna/logger": "^5.17.0",
+    "@athenna/test": "^5.8.0",
+    "@athenna/tsconfig": "^5.2.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "commitizen": "^4.3.1",
@@ -71,9 +71,9 @@
     "eslint-plugin-promise": "^6.6.0",
     "husky": "^3.1.0",
     "lint-staged": "^12.5.0",
-    "lru-cache": "^11.1.0",
+    "lru-cache": "^11.3.5",
     "prettier": "^2.8.8",
-    "redis": "^5.8.1"
+    "redis": "^5.11.0"
   },
   "c8": {
     "all": true,
