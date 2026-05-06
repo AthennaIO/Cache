@@ -122,8 +122,7 @@ export class RedisDriver extends Driver<RedisClientType> {
       url: this.url,
       socket: {
         ...this.socket,
-        reconnectStrategy:
-          config?.reconnectStrategy ?? defaultReconnectStrategy
+        reconnectStrategy: config?.reconnectStrategy ?? defaultReconnectStrategy
       }
     })
 
