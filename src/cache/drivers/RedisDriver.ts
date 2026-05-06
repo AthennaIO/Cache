@@ -106,9 +106,35 @@ export class RedisDriver extends Driver<RedisClientType> {
       return
     }
 
+    const config = Config.get(`cache.stores.${this.store}`)
     const { createClient } = this.getRedis()
 
-    this.client = createClient({ url: this.url, socket: this.socket })
+    const defaultReconnectStrategy = (retries: number) => {
+      if (retries >= 5) {
+        return new Error(
+          `Cache store "${this.store}": max reconnect retries reached`
+        )
+      }
+      return Math.min(retries * 200, 2000)
+    }
+
+    this.client = createClient({
+      url: this.url,
+      socket: {
+        ...this.socket,
+        reconnectStrategy:
+          config?.reconnectStrategy ?? defaultReconnectStrategy
+      }
+    })
+
+    // Required: without this listener node-redis emits 'error' events as
+    // unhandled rejections whenever the connection drops after initial connect.
+    this.client.on('error', err => {
+      Log.channelOrVanilla('application').error(
+        `({red} Error) on ({yellow} ${this.store}) cache store: ${err.message}`
+      )
+    })
+
     this.client
       .connect()
       .then(() => {
@@ -117,6 +143,11 @@ export class RedisDriver extends Driver<RedisClientType> {
             `Successfully connected to ({yellow} ${this.store}) cache store`
           )
         }
+      })
+      .catch(err => {
+        Log.channelOrVanilla('application').error(
+          `Failed to connect to ({yellow} ${this.store}) cache store: ${err.message}`
+        )
       })
 
     this.isConnected = true

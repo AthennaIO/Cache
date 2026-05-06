@@ -82,5 +82,16 @@ export type StoreOptions = {
      * @default Config.get(`cache.stores.${store}.maxEntrySize`)
      */
     maxEntrySize?: number
+
+    /**
+     * Define a custom reconnect strategy for the Redis connection.
+     * Receives the number of retries so far. Return a number (ms delay
+     * before next retry) or an Error to stop retrying and reject all
+     * pending commands. Defaults to exponential backoff that gives up
+     * after 5 retries.
+     *
+     * @default built-in exponential backoff, max 5 retries
+     */
+    reconnectStrategy?: (retries: number) => number | Error
   }
 }
