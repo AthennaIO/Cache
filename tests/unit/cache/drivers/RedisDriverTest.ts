@@ -82,6 +82,40 @@ export class RedisDriverTest {
   }
 
   @Test()
+  public async shouldResurrectAClosedClientOnTheNextCommand({ assert }: Context) {
+    const cache = Cache.store('redis')
+
+    await Sleep.for(100).milliseconds().wait()
+
+    await cache.set('resurrect', 'alive')
+
+    cache.driver.client.destroy()
+
+    assert.isFalse(cache.driver.client.isOpen)
+
+    const value = await cache.get('resurrect')
+
+    assert.equal(value, 'alive')
+    assert.isTrue(cache.driver.client.isOpen)
+  }
+
+  @Test()
+  public async shouldShareASingleReconnectAttemptBetweenConcurrentCommands({ assert }: Context) {
+    const cache = Cache.store('redis')
+
+    await Sleep.for(100).milliseconds().wait()
+
+    await cache.set('concurrent', 'ok')
+
+    cache.driver.client.destroy()
+
+    const values = await Promise.all([cache.get('concurrent'), cache.get('concurrent'), cache.get('concurrent')])
+
+    assert.deepEqual(values, ['ok', 'ok', 'ok'])
+    assert.isTrue(cache.driver.client.isOpen)
+  }
+
+  @Test()
   public async shouldBeAbleToSetValueToTheCache({ assert }: Context) {
     const cache = Cache.store('redis')
 

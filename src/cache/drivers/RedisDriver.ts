@@ -56,6 +56,26 @@ export class RedisDriver extends Driver<RedisClientType> {
    */
   public database: number
 
+  /**
+   * In-flight resurrection attempt, shared so concurrent commands
+   * don't race multiple connect() calls against a closed client.
+   */
+  private reconnectPromise: Promise<void> = null
+
+  /**
+   * Log without ever throwing: driver logs fire from node-redis event
+   * listeners and reconnect callbacks, where an exception (e.g. Logger
+   * service not bound in the container) would crash the process over a
+   * cache connection blip.
+   */
+  private log(level: 'success' | 'warn' | 'error', message: string) {
+    try {
+      Log.channelOrVanilla('application')[level](message)
+    } catch {
+      /* logging must never take the process down */
+    }
+  }
+
   public constructor(
     store: string,
     client: any = null,
@@ -109,13 +129,21 @@ export class RedisDriver extends Driver<RedisClientType> {
     const config = Config.get(`cache.stores.${this.store}`)
     const { createClient } = this.getRedis()
 
+    /**
+     * Never stop retrying: returning an Error here makes node-redis close
+     * the client permanently, so a Redis restart longer than the retry
+     * window would leave every future command throwing "The client is
+     * closed" until the process restarts.
+     */
     const defaultReconnectStrategy = (retries: number) => {
-      if (retries >= 5) {
-        return new Error(
-          `Cache store "${this.store}": max reconnect retries reached`
+      if (retries > 0 && retries % 10 === 0) {
+        this.log(
+          'warn',
+          `Cache store ({yellow} ${this.store}) still reconnecting after ${retries} retries`
         )
       }
-      return Math.min(retries * 200, 2000)
+
+      return Math.min(retries * 200, 5000)
     }
 
     this.client = createClient({
@@ -129,7 +157,8 @@ export class RedisDriver extends Driver<RedisClientType> {
     // Required: without this listener node-redis emits 'error' events as
     // unhandled rejections whenever the connection drops after initial connect.
     this.client.on('error', err => {
-      Log.channelOrVanilla('application').error(
+      this.log(
+        'error',
         `({red} Error) on ({yellow} ${this.store}) cache store: ${err.message}`
       )
     })
@@ -138,13 +167,15 @@ export class RedisDriver extends Driver<RedisClientType> {
       .connect()
       .then(() => {
         if (Config.is('rc.bootLogs', true)) {
-          Log.channelOrVanilla('application').success(
+          this.log(
+            'success',
             `Successfully connected to ({yellow} ${this.store}) cache store`
           )
         }
       })
       .catch(err => {
-        Log.channelOrVanilla('application').error(
+        this.log(
+          'error',
           `Failed to connect to ({yellow} ${this.store}) cache store: ${err.message}`
         )
       })
@@ -155,6 +186,35 @@ export class RedisDriver extends Driver<RedisClientType> {
     if (options.saveOnFactory) {
       StoreFactory.setClient(this.store, this.client)
     }
+  }
+
+  /**
+   * Reconnect a client that node-redis has permanently closed — a custom
+   * reconnect strategy that gave up, or a connection that never came up at
+   * boot. Without this, every command on that client throws "The client is
+   * closed" until the process restarts; with it, the next command heals the
+   * connection instead.
+   */
+  private async ensureConnection() {
+    if (!this.client || this.client.isOpen) {
+      return
+    }
+
+    if (!this.reconnectPromise) {
+      this.reconnectPromise = this.client
+        .connect()
+        .then(() => {
+          if (Config.is('rc.bootLogs', true)) {
+            this.log(
+              'success',
+              `Reconnected to ({yellow} ${this.store}) cache store`
+            )
+          }
+        })
+        .finally(() => (this.reconnectPromise = null))
+    }
+
+    await this.reconnectPromise
   }
 
   /**
@@ -183,6 +243,8 @@ export class RedisDriver extends Driver<RedisClientType> {
       return
     }
 
+    await this.ensureConnection()
+
     let cursor = '0'
 
     do {
@@ -206,6 +268,8 @@ export class RedisDriver extends Driver<RedisClientType> {
     if (!this.enabled) {
       return
     }
+
+    await this.ensureConnection()
 
     const value = await this.client.get(this.getCacheKey(key))
 
@@ -236,6 +300,8 @@ export class RedisDriver extends Driver<RedisClientType> {
     if (!this.enabled) {
       return
     }
+
+    await this.ensureConnection()
 
     const driverOptions: any = {}
 
@@ -276,6 +342,8 @@ export class RedisDriver extends Driver<RedisClientType> {
     if (!this.enabled) {
       return
     }
+
+    await this.ensureConnection()
 
     await this.client.del(this.getCacheKey(key))
   }
