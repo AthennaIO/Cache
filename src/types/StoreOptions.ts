@@ -87,10 +87,12 @@ export type StoreOptions = {
      * Define a custom reconnect strategy for the Redis connection.
      * Receives the number of retries so far. Return a number (ms delay
      * before next retry) or an Error to stop retrying and reject all
-     * pending commands. Defaults to exponential backoff that gives up
-     * after 5 retries.
+     * pending commands. By default the driver retries forever with a
+     * capped backoff (retries * 200ms, max 5s), since giving up leaves
+     * the client permanently closed. Even if a custom strategy gives up,
+     * the next command issued through the driver reconnects the client.
      *
-     * @default built-in exponential backoff, max 5 retries
+     * @default built-in capped backoff (retries * 200ms, max 5s), never gives up
      */
     reconnectStrategy?: (retries: number) => number | Error
   }
