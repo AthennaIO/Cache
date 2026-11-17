@@ -8,6 +8,7 @@
  */
 
 import { Cache, CacheProvider } from '#src'
+import { RedisDriver } from '#src/cache/drivers/RedisDriver'
 import { Path, Sleep } from '@athenna/common'
 import { Test, type Context, BeforeEach, AfterEach } from '@athenna/test'
 
@@ -113,6 +114,49 @@ export class RedisDriverTest {
 
     assert.deepEqual(values, ['ok', 'ok', 'ok'])
     assert.isTrue(cache.driver.client.isOpen)
+  }
+
+  @Test()
+  public async shouldSelectTheDatabaseByTheUrlPathWhenBuildingTheUrl({ assert }: Context) {
+    const driver = new RedisDriver('redis', null, { database: 2 })
+
+    assert.equal(new RedisDriver('redis').url, 'redis://localhost:6382/0')
+    assert.equal(driver.url, 'redis://localhost:6382/2')
+    assert.equal(driver.database, 2)
+  }
+
+  @Test()
+  public async shouldMoveADatabaseQueryOfTheUrlToItsPath({ assert }: Context) {
+    const driver = new RedisDriver('redis', null, { url: 'redis://:p%40ss@localhost:6382?database=1' })
+
+    assert.equal(driver.url, 'redis://:p%40ss@localhost:6382/1')
+    assert.equal(driver.database, 1)
+  }
+
+  @Test()
+  public async shouldKeepTheDatabaseOfTheUrlPathUnlessTheOptionsNameOne({ assert }: Context) {
+    assert.equal(new RedisDriver('redis', null, { url: 'redis://localhost:6382/3' }).url, 'redis://localhost:6382/3')
+    assert.equal(
+      new RedisDriver('redis', null, { url: 'redis://localhost:6382/3?database=4', database: 5 }).url,
+      'redis://localhost:6382/5'
+    )
+  }
+
+  @Test()
+  public async shouldWriteToTheDatabaseTheUrlQueryNames({ assert }: Context) {
+    const cache = Cache.store('redis', {
+      force: true,
+      saveOnFactory: false,
+      options: { url: 'redis://localhost:6382?database=1' }
+    })
+
+    await Sleep.for(100).milliseconds().wait()
+
+    const info = await cache.driver.client.sendCommand(['CLIENT', 'INFO'])
+
+    await cache.close()
+
+    assert.match(info, /\bdb=1\b/)
   }
 
   @Test()

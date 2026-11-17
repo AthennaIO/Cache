@@ -91,7 +91,6 @@ export class RedisDriver extends Driver<RedisClientType> {
     this.socket = options?.socket || config?.socket
     this.username = options?.username || config?.username
     this.password = options?.password || config?.password
-    this.database = options?.database || config?.database || 0
     this.protocol = options?.protocol || config?.protocol || 'redis'
 
     if (!this.url) {
@@ -102,10 +101,38 @@ export class RedisDriver extends Driver<RedisClientType> {
         password: this.password,
         protocol: this.protocol,
         database: ''
-      })
-
-      this.url = `${this.url.slice(0, -1)}?database=${this.database}`
+      }).slice(0, -1)
     }
+
+    /**
+     * An url given in the options brings its own database: the config's
+     * one only counts for the config's url.
+     */
+    this.url = this.urlWithDatabase(
+      this.url,
+      options?.database ?? (options?.url ? null : config?.database)
+    )
+  }
+
+  /**
+   * The url with its database in the path, the only place node-redis reads
+   * it from (`redis://host:6379/1`). A `?database=1` query — what this
+   * driver built before and what applications wrote in their urls — is
+   * ignored by node-redis, so every client landed on database 0 and two
+   * applications meant to be apart shared their keys. The query moves to
+   * the path; a `database` option wins over both; nothing selects 0.
+   */
+  private urlWithDatabase(url: string, database?: number | string | null) {
+    const parsed = new URL(url)
+    const fromQuery = parsed.searchParams.get('database')
+    const fromPath = parsed.pathname.replace(/^\/+/, '')
+
+    parsed.searchParams.delete('database')
+
+    this.database = Number(database ?? (fromPath || fromQuery || 0))
+    parsed.pathname = `/${this.database}`
+
+    return parsed.toString()
   }
 
   /**
